@@ -1,0 +1,75 @@
+@charset "utf-8";
+
+*{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+body{
+    margin: 0;
+    padding-top: 5%;
+    font-family: Arial, Helvetica, sans-serif;
+    min-height: 100vh;
+}
+.container-formulario{
+    margin: auto;
+    width: 75%;
+    min-height: 75vh;
+    border-radius: 20px;
+    border: 2px solid rgb(43, 43, 43);
+    position: relative;
+    display: flex;  
+    justify-content: center; 
+    align-items: center; 
+}
+.box{
+    position: relative;
+    width: 100%;  
+    height: 75vh; 
+    border-radius: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+form{
+    text-align: center;
+}
+#login{
+    width: 40%;
+    z-index: 0;
+    margin: 5%;
+}
+#cadastro{
+    width: 40%;
+    z-index: 0;
+    margin: 5%;
+}
+h4{
+    cursor: pointer;
+}
+.btnver {
+    position: relative;
+    top: -46px;
+    left: 43%;
+    z-index: 500;
+}
+.box-hide{
+    text-align: center;
+    width: 50%;
+    min-height: 100%;
+    border-radius: 19px;
+    background-color: rgb(92, 0, 92);
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    transition: left 1.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+#btn-troca{
+    width: fit-content;
+    margin: 1%;
+}
