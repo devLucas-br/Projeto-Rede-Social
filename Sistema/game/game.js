@@ -6,6 +6,7 @@ const ghostOrangeImg = document.getElementById("ghost-orange");
 const ghostBlueImg = document.getElementById("ghost-blue");
 const ghostPinkImg = document.getElementById("ghost-pink");
 const mapImage = document.getElementById("map-image");
+const startMenuImage = document.getElementById("startMenuImage");
 
 let createRect = (x, y, width, height, color) => {
     canvasContext.fillStyle = color;
@@ -37,7 +38,12 @@ const FOOD = 2;
 const POWER_PELLET = 3;
 const GHOST_HOUSE = 4;
 const GHOST_DOOR = 5;
+const GAME_STATE_MENU = 0;
+const GAME_STATE_PLAYING = 1;
+const GAME_STATE_GAME_OVER = 2;
+const GAME_STATE_WIN = 3;
 
+let currentGameState = GAME_STATE_MENU;
 
 let ghosts = [];
 
@@ -127,17 +133,27 @@ let drawGhostHouse = () => {
 }
 
 let drawScore = () => {
-    const x = 0;
-    const y = oneBlockSize * (map.length + 2);
+    // Salva o estado atual do contexto
+    canvasContext.save();
+    
+    const x = 10;
+    const y = oneBlockSize * (map.length + 1) + 20;
     const width = 200;
     const height = 30;
 
+    // Fundo para o score
     canvasContext.fillStyle = "black";
-    canvasContext.fillRect(x, y - height + 5, width, height);
+    canvasContext.fillRect(x - 5, y - height + 5, width, height);
 
-    canvasContext.font = "20px Emulogic";
-    canvasContext.fillStyle = "white";
-    canvasContext.fillText("Score: " + score, x, y);
+    // Configura o texto do score
+    canvasContext.font = "20px Arial";
+    canvasContext.fillStyle = "yellow";
+    canvasContext.textAlign = "left";
+    canvasContext.textBaseline = "top";
+    canvasContext.fillText("Score: " + score, x, y - 20);
+    
+    // Restaura o estado anterior do contexto
+    canvasContext.restore();
 };
 
 let checkVictory = () => {
@@ -218,88 +234,133 @@ let victory = () => {
     // Pausa o jogo
     clearInterval(gameInterval);
     
+    // Para qualquer animação anterior
+    if (victoryAnimation) {
+        clearInterval(victoryAnimation);
+        victoryAnimation = null;
+    }
+    
     // Limpa o canvas
     canvasContext.clearRect(0, 0, canvas.width, canvas.height);
     canvasContext.fillStyle = "black";
     canvasContext.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Exibe mensagem de vitória com animação simples
-    let fontSize = 20;
+    // Variáveis para animação
+    let fontSize = 40;
     let growing = true;
     let maxSize = 60;
     let minSize = 40;
+    let animationCounter = 0;
+    const maxAnimationTime = 150; // ~3 segundos a 50ms por frame
     
-    // Importante: Limpar qualquer animação anterior que possa estar rodando
-    if (victoryAnimation) {
-        clearInterval(victoryAnimation);
-    }
-    
-    // Use a variável global, sem "let" para não criar uma nova variável local
     victoryAnimation = setInterval(() => {
+        animationCounter++;
+        
         // Limpa o canvas
         canvasContext.clearRect(0, 0, canvas.width, canvas.height);
         canvasContext.fillStyle = "black";
         canvasContext.fillRect(0, 0, canvas.width, canvas.height);
         
-        // Desenha o texto de vitória com tamanho animado
-        canvasContext.font = '${fontSize}px Emulogic';
-        canvasContext.fillStyle = "yellow";
+        // Configura alinhamento centralizado
         canvasContext.textAlign = "center";
-        canvasContext.fillText("VITÓRIA!", canvas.width / 2, canvas.height / 2);
+        canvasContext.textBaseline = "middle";
         
-        // Exibe a pontuação final
-        canvasContext.font = "20px Emulogic";
+        // Desenha o texto de vitória com animação
+        canvasContext.font = fontSize + "px Arial";
+        canvasContext.fillStyle = "yellow";
+        canvasContext.fillText("VITÓRIA!", canvas.width / 2, canvas.height / 2 - 60);
+        
+        // Exibe a pontuação
+        canvasContext.font = "24px Arial";
         canvasContext.fillStyle = "white";
-        canvasContext.fillText('Pontuação: ${score}', canvas.width / 2, canvas.height / 2 + 60);
+        canvasContext.fillText("Pontuação: " + score, canvas.width / 2, canvas.height / 2);
         
         // Anima o tamanho do texto
         if (growing) {
-            fontSize += 0.5;
+            fontSize += 0.8;
             if (fontSize >= maxSize) growing = false;
         } else {
-            fontSize -= 0.5;
+            fontSize -= 0.8;
             if (fontSize <= minSize) growing = true;
         }
-    }, 50);
-
-    setTimeout(() => {
-        canvasContext.font = "16px Emulogic";
-        canvasContext.fillStyle = "white";
-        canvasContext.textAlign = "center";
-        canvasContext.fillText(
-            "Pressione ESPAÇO para jogar novamente", 
-            canvas.width / 2, 
-            canvas.height / 2 + 100
-        );
         
-        // Remove qualquer handler anterior para evitar duplicação
-        document.removeEventListener("keydown", restartGameHandler);
-        // Adiciona evento para reiniciar
-        document.addEventListener("keydown", restartGameHandler);
-    }, 2000);
+        // Após 3 segundos, para a animação e mostra tela final
+        if (animationCounter >= maxAnimationTime) {
+            clearInterval(victoryAnimation);
+            victoryAnimation = null;
+            showFinalVictoryScreen();
+        }
+    }, 50);
 };
+
+let showFinalVictoryScreen = () => {
+    // Limpa o canvas
+    canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+    canvasContext.fillStyle = "black";
+    canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Configura alinhamento centralizado
+    canvasContext.textAlign = "center";
+    canvasContext.textBaseline = "middle";
+    
+    // Título de vitória
+    canvasContext.font = "50px Arial";
+    canvasContext.fillStyle = "yellow";
+    canvasContext.fillText("VITÓRIA!", canvas.width / 2, canvas.height / 2 - 80);
+    
+    // Pontuação
+    canvasContext.font = "24px Arial";
+    canvasContext.fillStyle = "white";
+    canvasContext.fillText("Pontuação: " + score, canvas.width / 2, canvas.height / 2 - 20);
+    
+    // Instrução para reiniciar
+    canvasContext.font = "18px Arial";
+    canvasContext.fillStyle = "cyan";
+    canvasContext.fillText("Pressione ESPAÇO para jogar novamente", canvas.width / 2, canvas.height / 2 + 40);
+    
+    // Remove handlers anteriores e adiciona novo
+    document.removeEventListener("keydown", restartGameHandler);
+    document.addEventListener("keydown", restartGameHandler);
+};
+
 
 let gameOver = () => {
     // Pausa o jogo
     clearInterval(gameInterval);
     
-    // Exibe mensagem de game over
-    canvasContext.font = "40px Emulogic";
-    canvasContext.fillStyle = "red";
-    canvasContext.fillText("GAME OVER", canvas.width / 4, canvas.height / 2);
+    // Para qualquer animação de vitória
+    if (victoryAnimation) {
+        clearInterval(victoryAnimation);
+        victoryAnimation = null;
+    }
     
-    // Adiciona botão para reiniciar
+    // Limpa o canvas
+    canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+    canvasContext.fillStyle = "black";
+    canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Configura alinhamento centralizado
+    canvasContext.textAlign = "center";
+    canvasContext.textBaseline = "middle";
+    
+    // Exibe mensagem de game over
+    canvasContext.font = "40px Arial";
+    canvasContext.fillStyle = "red";
+    canvasContext.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 40);
+    
+    // Pontuação final
+    canvasContext.font = "24px Arial";
+    canvasContext.fillStyle = "white";
+    canvasContext.fillText("Pontuação: " + score, canvas.width / 2, canvas.height / 2);
+    
+    // Adiciona instrução para reiniciar após 2 segundos
     setTimeout(() => {
-        canvasContext.font = "20px Emulogic";
-        canvasContext.fillStyle = "white";
-
-        canvasContext.fillText(
-        "Pressione ESPAÇO para tentar novamente", 
-        canvas.width / 8, 
-        canvas.height / 2 + 40
-        );
+        canvasContext.font = "18px Arial";
+        canvasContext.fillStyle = "cyan";
+        canvasContext.fillText("Pressione ESPAÇO para tentar novamente", canvas.width / 2, canvas.height / 2 + 40);
         
-        // Evento para reiniciar o jogo
+        // Remove handlers anteriores e adiciona novo
+        document.removeEventListener("keydown", restartGameHandler);
         document.addEventListener("keydown", restartGameHandler);
     }, 2000);
 };
@@ -318,7 +379,7 @@ let restartGameHandler = (event) => {
 };
 
 let restartGame = () => {
-    // Garantir que a animação de vitória seja interrompida
+
     if (victoryAnimation) {
         clearInterval(victoryAnimation);
         victoryAnimation = null;
@@ -341,42 +402,64 @@ let restartGame = () => {
     // Limpar o canvas antes de reiniciar
     canvasContext.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Reinicia o loop do jogo
-    gameInterval = setInterval(gameLoop, 1000 / fps);
+    if (currentGameState === GAME_STATE_PLAYING) {
+        gameInterval = setInterval(gameLoop, 1000 / fps);
+    }
+
+};
+
+let drawMenu = () => {
+    canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+    if (startMenuImage.complete) { // Garante que a imagem foi carregada
+        canvasContext.drawImage(startMenuImage, 0, 0, canvas.width, canvas.height);
+    } else {
+        // Fallback se a imagem não carregar, ou um loader
+        canvasContext.fillStyle = "black";
+        canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+        canvasContext.fillStyle = "white";
+        canvasContext.font = "24px Arial";
+        canvasContext.textAlign = "center";
+        canvasContext.fillText("Pressione ESPAÇO para Iniciar", canvas.width / 2, canvas.height / 2);
+    }
 };
 
 
 let gameLoop = () => {
-    update();
-    draw();
+    if (currentGameState === GAME_STATE_PLAYING) {
+        update();
+        draw();
+    } else if (currentGameState === GAME_STATE_MENU) {
+        drawMenu();
+    }
 };
-
-
-createNewPacman();
-createGhosts();
-let gameInterval = setInterval(gameLoop, 1000 / fps);
-
 
 window.addEventListener("keydown", (event) => {
     let k = event.keyCode;
 
+    // Lidar com o estado do menu
+    if (currentGameState === GAME_STATE_MENU && k === 32) {
+        currentGameState = GAME_STATE_PLAYING;
+        createNewPacman();
+        createGhosts();
+        gameInterval = setInterval(gameLoop, 1000 / fps); 
+        return;
+    }
+
     setTimeout(() => {
         if (k == 37 || k == 65) {
             //esquerda
-
             pacman.nextDirection = DIRECTION_LEFT;
         } else if (k == 38 || k == 87) {
             //cima
-
             pacman.nextDirection = DIRECTION_UP;
         } else if (k == 39 || k == 68) {
-            // direita 
-
+            //direita
             pacman.nextDirection = DIRECTION_RIGHT;
         } else if (k == 40 || k == 83) {
-            // baixo 
-
+            //baixo
             pacman.nextDirection = DIRECTION_BOTTOM;
         }
-    }, 1)
+    }, 1);
 });
+
+gameLoop(); 
