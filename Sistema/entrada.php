@@ -43,46 +43,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $conn->close();
     }
-    if(isset($_POST["botaoComment"])){
-            $id_usuario_comentou = $_SESSION["id_user"];
-            $id_coisa_comentada = $_POST["id_coisa_comentada"];
-            if(empty($_POST["InputComment"])){
-                $vazioComentario = "Comentário está vazio!";
-                echo "<script>alert('Comentário vazio!')</script>";
-            }else{
-                $comentario = $_POST["InputComment"];
-            }
-        if(empty($vazioComentario)){
-            // Conectar com o banco
-            require '../app/conexao.php';
-            // Inserir no banco com SQL
-            $sql = "INSERT INTO `comentarios` (`id_coisa`, `id_usuario`, `comentario`) VALUES ('$id_usuario_comentou','$id_coisa_comentada', '$comentario')";
-            if ($conn->query($sql) === TRUE) {
-                // echo "New record created successfully";
-                $exibeMensagem = "show";
-                $textoMensagem = "Seu comentário foi realizado com sucesso!";
-            } else {
-                echo "Error: " . $sql . "<br>" . $conn->error;
-            }
-
-            $conn->close();
-        }
-    }
-    if(isset($_POST["botao_teste"])){
+    if (isset($_POST["botaoComment"])) {
+        $id_usuario_comentou = $_SESSION["id_user"];
         $id_coisa_comentada = $_POST["id_coisa_comentada"];
-        if(isset($_POST["botaoComment"])){
-            $id_usuario_comentou = $_SESSION["id_user"];
-            if(empty($_POST["InputComment"])){
-                $vazioComentario = "Comentário está vazio!";
-                echo "<script>alert('Comentário vazio!')</script>";
-            }else{
-                $comentario = $_POST["InputComment"];
-            }
-        if(empty($vazioComentario)){
+        if (empty($_POST["InputComment"])) {
+            $vazioComentario = "Comentário está vazio!";
+            echo "<script>alert('Comentário vazio!')</script>";
+        } else {
+            $comentario = $_POST["InputComment"];
+        }
+        if (empty($vazioComentario)) {
             // Conectar com o banco
             require '../app/conexao.php';
             // Inserir no banco com SQL
-            $sql = "INSERT INTO `comentarios` (`id_coisa`, `id_usuario`, `comentario`) VALUES ('$id_usuario_comentou','$id_coisa_comentada', '$comentario')";
+            $sql = "INSERT INTO `comentarios` (`id_coisa`, `id_usuario`, `comentario`) VALUES ('$id_coisa_comentada','$id_usuario_comentou', '$comentario')";
             if ($conn->query($sql) === TRUE) {
                 // echo "New record created successfully";
                 $exibeMensagem = "show";
@@ -94,6 +68,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $conn->close();
         }
     }
+    if (isset($_POST["botao_teste"])) {
+        $id_coisa_comentada = $_POST["id_coisa_comentada"];
+        if (isset($_POST["botaoComment"])) {
+            $id_usuario_comentou = $_SESSION["id_user"];
+            if (empty($_POST["InputComment"])) {
+                $vazioComentario = "Comentário está vazio!";
+                echo "<script>alert('Comentário vazio!')</script>";
+            } else {
+                $comentario = $_POST["InputComment"];
+            }
+            if (empty($vazioComentario)) {
+                // Conectar com o banco
+                require '../app/conexao.php';
+                // Inserir no banco com SQL
+                $sql = "INSERT INTO `comentarios` (`id_coisa`, `id_usuario`, `comentario`) VALUES ('$id_usuario_comentou','$id_coisa_comentada', '$comentario')";
+                if ($conn->query($sql) === TRUE) {
+                    // echo "New record created successfully";
+                    $exibeMensagem = "show";
+                    $textoMensagem = "Seu comentário foi realizado com sucesso!";
+                } else {
+                    echo "Error: " . $sql . "<br>" . $conn->error;
+                }
+
+                $conn->close();
+            }
+        }
     }
     if (isset($_POST["botao_postar"])) {
         // Verificar se preencheu tudo que precisa
@@ -256,7 +256,7 @@ function tratarImagem()
             gap: 10px;
         }
 
-        .botao{
+        .botao {
             margin: 20px;
         }
     </style>
@@ -365,7 +365,7 @@ function tratarImagem()
                 </div>
                 <div class="col-lg-1 pt-2">
                     <form method="post">
-                        <button name="botao_teste" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#CommentsModal">
+                        <button name="botao_teste" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#CommentsModal' . $row["postagem_id"] . '">
                             &#128488
                         </button>
                     </form>
@@ -376,30 +376,16 @@ function tratarImagem()
             </div>
         </div>
     </div>
-    <div class="modal fade" id="CommentsModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="CommentsModal' . $row["postagem_id"] . '" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5" id="exampleModalLabel">Comentários</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button data-bs-target="#CommentsModal' . $row["postagem_id"] . '" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <!-- comentários -->
-                    <div class="container">
-                        <div class="cabecalho">
-                            <img class="img_comment" src="../imagens/anonymous.png" alt="">
-                            <p>Nome do User</p>
-                            <p class="dataComment">11/05/25</p>
-                        </div>
-                        <div class="comentario">
-                            <p>comentário escrito pelo usu[ario</p>
-                        </div>
-                        <div class="CommentsLike">
-                            <h4>&#128077</h4>
-                            <h4>&#128078</h4>
-                        </div>
-                    </div>
-                </div>
+                <div class="modal-body">'; ?>
+                    <?php require '../app/puxacoments.php' ?>
+            <?php echo '</div>
                 <div class="">
                     <form class="postComment" action="" method="post">
                         <div class="form-floating mb-3 w-75">
